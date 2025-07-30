@@ -111,5 +111,4 @@ module "data_factory" {
   location               = module.resource_group.resource_group_location
   resource_group_name    = module.resource_group.resource_group_name
   key_vault_id           = module.vault.id
-  cmk_encryption_enabled = true
 }

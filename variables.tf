@@ -94,7 +94,7 @@ variable "enabled" {
 ##-----------------------------------------------------------------------------
 variable "public_network_enabled" {
   type        = bool
-  default     = true
+  default     = false
   description = "Enable public network access for Data Factory."
 }
 

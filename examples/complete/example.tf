@@ -110,7 +110,7 @@ module "data_factory" {
   label_order            = ["name", "environment", "location"]
   location               = module.resource_group.resource_group_location
   resource_group_name    = module.resource_group.resource_group_name
-  public_network_enabled = false
-  cmk_encryption_enabled = true
   key_vault_id           = module.vault.id
+  public_network_enabled = true
+  cmk_encryption_enabled = true
 }

@@ -130,7 +130,7 @@ variable "principal_id" {
 
 variable "cmk_encryption_enabled" {
   type        = bool
-  default     = false
+  default     = true
   description = "Enable Customer Managed Key encryption."
 }
 

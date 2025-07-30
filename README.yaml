@@ -5,13 +5,13 @@
 #
 
 # Name of this project
-name : Terraform Azure Module Template
+name : Terraform Azure Data Factory
 
 # License of this project
 license: "APACHE"
 
 # Canonical GitHub repo
-github_repo: terraform-az-modules/terraform-module-template
+github_repo: terraform-az-modules/terraform-azure-data-factory
 
 # Badges to display
 badges:
@@ -38,12 +38,19 @@ providers:
 
 #  description of this project
 description: |-
-  Terraform Azure Module Template to create new modules using this as baseline
+  Terraform Azure Data Factory is a Terraform module that allows you to create and manage Azure Data Factory.
 
-# How to use this project
 # How to use this project
 usage: |-
   Here are some examples of how you can use this module in your inventory structure:
   ```hcl
-    locals {}
+  module "data_factory" {
+  depends_on          = [module.resource_group]
+  source              = "./../../"
+  name                = "core"
+  environment         = "dev"
+  label_order         = ["name", "environment", "location"]
+  location            = module.resource_group.resource_group_location
+  resource_group_name = module.resource_group.resource_group_name
+  }
     ```

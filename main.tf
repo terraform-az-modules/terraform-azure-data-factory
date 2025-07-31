@@ -15,20 +15,23 @@ module "labels" {
 }
 
 resource "azurerm_data_factory" "factory" {
-  count                           = var.enabled ? 1 : 0
-  name                            = replace(var.resource_position_prefix ? format("adf-%s", local.name) : format("%s-adf", local.name), "-", "")
-  location                        = var.location
-  resource_group_name             = var.resource_group_name
-  public_network_enabled          = var.public_network_enabled
-  managed_virtual_network_enabled = var.managed_virtual_network_enabled
-  tags                            = module.labels.tags
+  count                            = var.enabled ? 1 : 0
+  name                             = replace(var.resource_position_prefix ? format("adf-%s", local.name) : format("%s-adf", local.name), "-", "")
+  location                         = var.location
+  resource_group_name              = var.resource_group_name
+  public_network_enabled           = var.public_network_enabled
+  managed_virtual_network_enabled  = var.managed_virtual_network_enabled
+  tags                             = module.labels.tags
+  customer_managed_key_id          = var.cmk_encryption_enabled ? azurerm_key_vault_key.main[0].id : null
+  customer_managed_key_identity_id = var.cmk_encryption_enabled ? join("", azurerm_user_assigned_identity.identity.*.id) : null
   dynamic "identity" {
-    for_each = var.identity_type != null ? [1] : []
+    for_each = var.identity_type != null || var.cmk_encryption_enabled ? [1] : []
     content {
-      type         = var.identity_type
-      identity_ids = var.identity_type == "UserAssigned" ? [join("", azurerm_user_assigned_identity.identity.*.id)] : null
+      type         = var.cmk_encryption_enabled ? (var.identity_type == "SystemAssigned" ? "SystemAssigned, UserAssigned" : "UserAssigned") : var.identity_type
+      identity_ids = var.cmk_encryption_enabled || var.identity_type == "UserAssigned" ? [join("", azurerm_user_assigned_identity.identity.*.id)] : null
     }
   }
+
   dynamic "github_configuration" {
     for_each = var.github_configuration != null ? [1] : []
     content {
@@ -57,5 +60,40 @@ resource "azurerm_data_factory" "factory" {
       type  = global_parameter.value.type
       value = global_parameter.value.value
     }
+  }
+}
+
+resource "azurerm_key_vault_key" "main" {
+  depends_on      = [azurerm_role_assignment.identity_assigned]
+  count           = var.enabled && var.cmk_encryption_enabled ? 1 : 0
+  name            = var.resource_position_prefix ? format("cmk-key-adf-%s", local.name) : format("%s-cmk-key-adf", local.name)
+  key_vault_id    = var.key_vault_id
+  key_type        = var.key_type
+  key_size        = var.key_size
+  expiration_date = var.key_expiration_date
+  key_opts        = var.key_permissions
+}
+
+resource "azurerm_private_endpoint" "main" {
+  count                         = var.enabled && var.enable_private_endpoint ? 1 : 0
+  name                          = var.resource_position_prefix ? format("pe-adf-%s", local.name) : format("%s-pe-adf", local.name)
+  location                      = var.location
+  resource_group_name           = var.resource_group_name
+  subnet_id                     = var.subnet_id
+  custom_network_interface_name = var.resource_position_prefix ? format("pe-nic-adf-%s", local.name) : format("%s-pe-nic-adf", local.name)
+  private_dns_zone_group {
+    name                 = var.resource_position_prefix ? format("dns-zone-group-adf-%s", local.name) : format("%s-dns-zone-group-adf", local.name)
+    private_dns_zone_ids = [var.private_dns_zone_ids]
+  }
+  private_service_connection {
+    name                           = var.resource_position_prefix ? format("psc-adf-%s", local.name) : format("%s-psc-adf", local.name)
+    is_manual_connection           = var.manual_connection
+    private_connection_resource_id = azurerm_data_factory.factory[0].id
+    subresource_names              = ["dataFactory"]
+  }
+  lifecycle {
+    ignore_changes = [
+      tags,
+    ]
   }
 }

@@ -104,15 +104,45 @@ variable "managed_virtual_network_enabled" {
   description = "Enable managed virtual network for Data Factory."
 }
 
+variable "shared_access_key_enabled" {
+  type        = bool
+  default     = true
+  description = "Enable Shared Access Key authentication for storage account."
+}
+
+##-----------------------------------------------------------------------------
+## Identity & Security Configuration
+##-----------------------------------------------------------------------------
 variable "identity_type" {
   description = "Type of Managed Service Identity. Options: SystemAssigned, UserAssigned, or both."
   type        = string
-  default     = "SystemAssigned"
+  default     = "UserAssigned"
 }
 
 variable "identity_ids" {
   description = "List of User Assigned Managed Identity IDs."
   type        = list(string)
+  default     = null
+}
+
+variable "principal_id" {
+  type        = list(string)
+  default     = []
+  description = "Principal IDs (User, Group, or Service Principal) for role assignment."
+}
+
+##-----------------------------------------------------------------------------
+## Key Vault - Customer Managed Key (CMK) Encryption
+##-----------------------------------------------------------------------------
+variable "cmk_encryption_enabled" {
+  type        = bool
+  default     = true
+  description = "Enable Customer Managed Key encryption."
+}
+
+variable "customer_managed_key_id" {
+  description = "The ID of the Key Vault Key for Data Factory encryption"
+  type        = string
   default     = null
 }
 
@@ -122,24 +152,33 @@ variable "key_vault_id" {
   description = "Key Vault ID for encryption keys."
 }
 
-variable "principal_id" {
+variable "key_expiration_date" {
+  description = "The expiration date for the Key Vault key"
+  type        = string
+  default     = "2028-12-31T23:59:59Z" # ISO 8601 format
+}
+
+variable "key_type" {
+  description = "The type of the key to create in Key Vault."
+  type        = string
+  default     = "RSA-HSM"
+}
+
+variable "key_size" {
+  description = "The size of the RSA key in bits."
+  type        = number
+  default     = 2048
+}
+
+variable "key_permissions" {
   type        = list(string)
-  default     = []
-  description = "Principal IDs (User, Group, or Service Principal) for role assignment."
+  default     = ["decrypt", "encrypt", "sign", "unwrapKey", "verify", "wrapKey"]
+  description = "List of key permissions for the Key Vault key."
 }
 
-variable "cmk_encryption_enabled" {
-  type        = bool
-  default     = true
-  description = "Enable Customer Managed Key encryption."
-}
-
-variable "shared_access_key_enabled" {
-  type        = bool
-  default     = true
-  description = "Enable Shared Access Key authentication for storage account."
-}
-
+##-----------------------------------------------------------------------------
+## Git Integration Configuration
+##-----------------------------------------------------------------------------
 variable "github_configuration" {
   type = object({
     account_name    = string
@@ -165,6 +204,9 @@ variable "vsts_configuration" {
   description = "Azure DevOps (VSTS) integration configuration."
 }
 
+##-----------------------------------------------------------------------------
+## Parameters
+##-----------------------------------------------------------------------------
 variable "global_parameters" {
   type = list(object({
     name  = string
@@ -173,4 +215,31 @@ variable "global_parameters" {
   }))
   default     = null
   description = "List of global parameters for Data Factory."
+}
+
+##-----------------------------------------------------------------------------
+## Private Endpoint Configuration
+##-----------------------------------------------------------------------------
+variable "enable_private_endpoint" {
+  type        = bool
+  default     = false
+  description = "Enable private endpoint for ACR."
+}
+
+variable "subnet_id" {
+  type        = string
+  default     = null
+  description = "Subnet ID for the private endpoint."
+}
+
+variable "private_dns_zone_ids" {
+  type        = string
+  default     = null
+  description = "The ID of the private DNS zone."
+}
+
+variable "manual_connection" {
+  description = "Indicates whether the connection is manual"
+  type        = bool
+  default     = false
 }

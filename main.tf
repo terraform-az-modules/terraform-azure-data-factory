@@ -97,3 +97,10 @@ resource "azurerm_private_endpoint" "main" {
     ]
   }
 }
+
+resource "azurerm_data_factory_linked_service_key_vault" "main" {
+  count           = var.enabled && var.cmk_encryption_enabled ? 1 : 0
+  name            = var.resource_position_prefix ? format("kv-adf-%s", local.name) : format("%s-kv-adf", local.name)
+  data_factory_id = azurerm_data_factory.factory[0].id
+  key_vault_id    = var.key_vault_id
+}

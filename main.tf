@@ -16,7 +16,7 @@ module "labels" {
 
 resource "azurerm_data_factory" "main" {
   count                            = var.enabled ? 1 : 0
-  name                             = replace(var.resource_position_prefix ? format("adf-%s", local.name) : format("%s-adf", local.name), "-", "")
+  name                             = var.resource_position_prefix ? format("adf-%s", local.name) : format("%s-adf", local.name)
   location                         = var.location
   resource_group_name              = var.resource_group_name
   public_network_enabled           = var.public_network_enabled

@@ -104,12 +104,6 @@ variable "managed_virtual_network_enabled" {
   description = "Enable managed virtual network for Data Factory."
 }
 
-variable "shared_access_key_enabled" {
-  type        = bool
-  default     = true
-  description = "Enable Shared Access Key authentication for storage account."
-}
-
 ##-----------------------------------------------------------------------------
 ## Identity & Security Configuration
 ##-----------------------------------------------------------------------------
@@ -119,12 +113,6 @@ variable "identity_type" {
   default     = "UserAssigned"
 }
 
-variable "principal_id" {
-  type        = list(string)
-  default     = []
-  description = "Principal IDs (User, Group, or Service Principal) for role assignment."
-}
-
 ##-----------------------------------------------------------------------------
 ## Key Vault - Customer Managed Key (CMK) Encryption
 ##-----------------------------------------------------------------------------
@@ -132,12 +120,6 @@ variable "cmk_encryption_enabled" {
   type        = bool
   default     = true
   description = "Enable Customer Managed Key encryption."
-}
-
-variable "customer_managed_key_id" {
-  description = "The ID of the Key Vault Key for Data Factory encryption"
-  type        = string
-  default     = null
 }
 
 variable "key_vault_id" {

@@ -119,12 +119,6 @@ variable "identity_type" {
   default     = "UserAssigned"
 }
 
-variable "identity_ids" {
-  description = "List of User Assigned Managed Identity IDs."
-  type        = list(string)
-  default     = null
-}
-
 variable "principal_id" {
   type        = list(string)
   default     = []
@@ -223,7 +217,7 @@ variable "global_parameters" {
 variable "enable_private_endpoint" {
   type        = bool
   default     = false
-  description = "Enable private endpoint for ACR."
+  description = "Enable private endpoint for Data Factory."
 }
 
 variable "subnet_id" {

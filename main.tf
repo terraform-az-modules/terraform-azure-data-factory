@@ -14,7 +14,7 @@ module "labels" {
   extra_tags      = var.extra_tags
 }
 
-resource "azurerm_data_factory" "factory" {
+resource "azurerm_data_factory" "main" {
   count                            = var.enabled ? 1 : 0
   name                             = replace(var.resource_position_prefix ? format("adf-%s", local.name) : format("%s-adf", local.name), "-", "")
   location                         = var.location
@@ -23,12 +23,12 @@ resource "azurerm_data_factory" "factory" {
   managed_virtual_network_enabled  = var.managed_virtual_network_enabled
   tags                             = module.labels.tags
   customer_managed_key_id          = var.cmk_encryption_enabled ? azurerm_key_vault_key.main[0].id : null
-  customer_managed_key_identity_id = var.cmk_encryption_enabled ? join("", azurerm_user_assigned_identity.identity.*.id) : null
+  customer_managed_key_identity_id = var.cmk_encryption_enabled ? azurerm_user_assigned_identity.identity[0].id : null
   dynamic "identity" {
-    for_each = var.identity_type != null || var.cmk_encryption_enabled ? [1] : []
+    for_each = var.identity_type != null ? [1] : []
     content {
-      type         = var.cmk_encryption_enabled ? (var.identity_type == "SystemAssigned" ? "SystemAssigned, UserAssigned" : "UserAssigned") : var.identity_type
-      identity_ids = var.cmk_encryption_enabled || var.identity_type == "UserAssigned" ? [join("", azurerm_user_assigned_identity.identity.*.id)] : null
+      type         = var.identity_type
+      identity_ids = var.identity_type == "UserAssigned" ? azurerm_user_assigned_identity.identity[*].id : null
     }
   }
 
@@ -61,6 +61,7 @@ resource "azurerm_data_factory" "factory" {
       value = global_parameter.value.value
     }
   }
+  depends_on = [azurerm_key_vault_key.main]
 }
 
 resource "azurerm_key_vault_key" "main" {
@@ -88,7 +89,7 @@ resource "azurerm_private_endpoint" "main" {
   private_service_connection {
     name                           = var.resource_position_prefix ? format("psc-adf-%s", local.name) : format("%s-psc-adf", local.name)
     is_manual_connection           = var.manual_connection
-    private_connection_resource_id = azurerm_data_factory.factory[0].id
+    private_connection_resource_id = azurerm_data_factory.main[0].id
     subresource_names              = ["dataFactory"]
   }
   lifecycle {
@@ -101,6 +102,6 @@ resource "azurerm_private_endpoint" "main" {
 resource "azurerm_data_factory_linked_service_key_vault" "main" {
   count           = var.enabled && var.cmk_encryption_enabled ? 1 : 0
   name            = var.resource_position_prefix ? format("kv-adf-%s", local.name) : format("%s-kv-adf", local.name)
-  data_factory_id = azurerm_data_factory.factory[0].id
+  data_factory_id = azurerm_data_factory.main[0].id
   key_vault_id    = var.key_vault_id
 }

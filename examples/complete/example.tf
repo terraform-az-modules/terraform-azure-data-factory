@@ -103,7 +103,7 @@ module "private_dns_zone" {
 # Data Factory
 # ------------------------------------------------------------------------------
 module "data_factory" {
-  depends_on              = [module.resource_group]
+  depends_on              = [module.resource_group,module.vault]
   source                  = "./../../"
   name                    = "core"
   environment             = "dev"
@@ -111,7 +111,6 @@ module "data_factory" {
   location                = module.resource_group.resource_group_location
   resource_group_name     = module.resource_group.resource_group_name
   key_vault_id            = module.vault.id
-  enable_private_endpoint = true
   subnet_id               = module.subnet.subnet_ids.subnet1
   private_dns_zone_ids    = module.private_dns_zone.private_dns_zone_ids.azure_data_factory
 }

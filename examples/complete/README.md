@@ -1,8 +1,8 @@
 <!-- BEGIN_TF_DOCS -->
 
-# Terraform Azure Module Template
+# Terraform Azure Data Factory Module
 
-This directory contains an example usage of the **terraform-azure-module-template**. It demonstrates how to use the module with default settings or with custom configurations.
+This module provisions an **Azure Data Factory** instance with optional configurations for customer-managed keys (CMK), integration with Azure Key Vault, and private networking. It is intended to be used as part of a modular Azure infrastructure deployment.
 
 ---
 
@@ -17,30 +17,43 @@ This directory contains an example usage of the **terraform-azure-module-templat
 
 ## 🔌 Providers
 
-None specified in this example.
+_No providers are explicitly defined in this example._
 
 ---
 
 ## 📦 Modules
 
-None specified in this example.
+
+| Name             | Source                                 | Version  |
+|------------------|----------------------------------------|----------|
+| resource_group   | terraform-az-modules/resource-group/azure | 1.0.0 |
+| vnet             | terraform-az-modules/vnet/azure           | 1.0.0 |
+| subnet           | terraform-az-modules/subnet/azure         | 1.0.0 |
+| vault            | terraform-az-modules/key-vault/azure      | 1.0.0 |
+| private_dns_zone | terraform-az-modules/private-dns/azure    | 1.0.0 |
+| data_factory     | ./../../                                  | n/a    |
+
 
 ---
 
+
 ## 🏗️ Resources
 
-No resources are directly created in this example.
+_No standalone resources are declared in this example._
 
 ---
 
 ## 🔧 Inputs
 
-No input variables are defined in this example.
+_No input variables are defined in this example._
 
 ---
 
 ## 📤 Outputs
 
-No outputs are defined in this example.
+| Name                    | Description                                         |
+|-------------------------|-----------------------------------------------------|
+| data_factory_id         | The ID of the deployed Azure Data Factory.         |
+| data_factory_identity   | The managed identity block of the Data Factory.    |
 
 <!-- END_TF_DOCS -->
